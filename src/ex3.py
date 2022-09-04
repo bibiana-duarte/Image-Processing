@@ -12,7 +12,8 @@ results = script_location.parent.joinpath("../results/")
 
 CAT = Image.open(assets.joinpath("cat.jpg"))
 
-# DOG = np.array(Image.open(assets.joinpath("dog.jpg")))
+
+# DOG = Image.open(assets.joinpath("cat.jpg"))
 # DOG = CAT.convert('L')
 # DOG = np.array(DOG)
 # CHIHIRO = np.array(Image.open(assets.joinpath("chihiro.jpg")))
@@ -25,8 +26,6 @@ def is_contaminated(percent):
 def add_salt_and_pepper_noise(img, contamination_percentage):
     i = img.convert('L')
     width, height = i.size
-    higher = 0
-    lower = 256
 
     for w in tqdm(range(width)):
         for h in range(height):
@@ -38,6 +37,8 @@ def add_salt_and_pepper_noise(img, contamination_percentage):
     return i
 
 
+
 img = add_salt_and_pepper_noise(CAT, 0.1)
 img.save(results.joinpath('cat-salt_and_pepper.jpg'))
 print()
+

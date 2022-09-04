@@ -15,7 +15,7 @@ RICE = Image.open(assets.joinpath("rice.jpg"))
 # DOG = np.array(Image.open(assets.joinpath("dog.jpg")))
 # DOG = CAT.convert('L')
 # DOG = np.array(DOG)
-# CHIHIRO = np.array(Image.open(assets.joinpath("chihiro.jpg")))
+CHIHIRO = Image.open(assets.joinpath("chihiro.jpg"))
 
 
 def cv_contrast_stretch(image):
@@ -99,12 +99,40 @@ def histogram_equalization(img):
 
     return i
 
+def rgb_to_hsv(r,g,b):
+    r = r/255
+    g = g/255
+    b = b/255
+
+    higher_rgb_value = max(r,g,b)
+    lower_rgb_value = min(r,g,b)
+    value = higher_rgb_value
+    dif = higher_rgb_value - lower_rgb_value
+
+    if higher_rgb_value == lower_rgb_value:
+        return 0.0, 0.0 , value
+
+    saturation = dif/higher_rgb_value
+
+    if higher_rgb_value == r:
+        hue = (60 * ((g-b)/dif) + 360) % 360
+    
+    if higher_rgb_value == g:
+        hue = (60 * ((b-r)/dif) + 120) % 360
+
+    if higher_rgb_value == b:
+        hue = (60 * ((r-g)/dif) + 240) % 360
+ 
+    return hue,saturation, value
+
+
 
 img = histogram_equalization(RICE)
 img.save(results.joinpath('rice-histo.jpg'))
 print()
 
-img = contrast_stretching(RICE)
-img.save(results.joinpath('rice-stretching.jpg'))
+
+
+#img.save(results.joinpath('chihiro_hsv.png'))
 print()
 
