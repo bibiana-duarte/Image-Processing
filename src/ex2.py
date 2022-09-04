@@ -41,12 +41,64 @@ def contrast_stretching(img):
     return i
 
 
+def get_histogram(img):
 
-print("Contrast Stretching")
-img = contrast_stretching(CAT)
-img.save(results.joinpath('cat-cs.jpg'))
+    img = img.convert('L')
+    width, height = img.size
+    histogram = [0]*256
+    num = [0]*256
+
+    for i in range(255):
+        num[i] = i  
+
+    for x in range(width):
+        for y in range(height):
+            p = img.getpixel((x,y)) 
+            histogram[p] += 1 
+
+    return histogram
+
+
+def cumulative_histogram(img):
+    histogram = get_histogram(img)
+    cumulative_hist = [0.0]*256
+    width, height = img.size
+    num_pixels = width*height
+    alpha = int(255.0/num_pixels)
+    cumulative_hist[0] = alpha*(histogram[0])
+
+    for j in range (255):
+        cumulative_hist[j] = cumulative_hist[j-1] + alpha*histogram[j] 
+
+    return cumulative_hist
+
+
+def histogram_equalization(img):
+    img = img.convert("L")
+    histogram = get_histogram(img)
+    i = img
+    cumulative_hist = [0]*256
+    width, height = img.size
+    num_pixels = width*height
+    alpha = 255.0/num_pixels
+    cumulative_hist[0] = alpha*histogram[0]
+
+    for j in range (255):
+        cumulative_hist[j] = cumulative_hist[j-1] + alpha*histogram[j] 
+
+    for w in tqdm(range(width)):
+        for h in range(height):
+            c = img.getpixel((w,h)) 
+            i.putpixel((w,h), (int(cumulative_hist[c])) ) 
+
+    return i 
+
+
+img = histogram_equalization(CAT)
+img.save(results.joinpath('cat-histogram-equalization.jpg'))
 print()
-img.show()
 
+img = contrast_stretching(CAT)
+img.save(results.joinpath('cat-contrast-stretching.jpg'))
+print()
 
-    
