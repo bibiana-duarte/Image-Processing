@@ -15,35 +15,51 @@ RICE = Image.open(assets.joinpath("rice.jpg"))
 # DOG = np.array(Image.open(assets.joinpath("dog.jpg")))
 # DOG = CAT.convert('L')
 # DOG = np.array(DOG)
-CHIHIRO = Image.open(assets.joinpath("chihiro.jpg"))
+# CHIHIRO = np.array(Image.open(assets.joinpath("chihiro.jpg")))
+KIKI = Image.open(assets.joinpath("kiki.jpg"))
+FUJI = Image.open(assets.joinpath("fuji.jpg"))
 
 
-def cv_contrast_stretch(image):
-    g = (image - np.amin(image) / np.amax(image) - np.amin(image))
-    return Image.fromarray(g.astype('uint8'))
-
-def contrast_stretching(img):
-
-    i = img.convert('L')
+def contrast_stretching(img, is_colored=False):
+    if is_colored:
+        i = img.convert('HSV')
+    else:
+        i = img.convert('L')
     width, height = i.size
     higher = 0
     lower = 256
+    if is_colored:
+        for w in range(width):
+            for h in range(height):
+                if (i.getpixel((w, h)))[2] > higher:
+                    higher = i.getpixel((w, h))[2]
 
-    for w in range(width):
-        for h in range(height):
-            if (i.getpixel((w, h))) > higher:
-                higher = i.getpixel((w, h))
+        for w in range(width):
+            for h in range(height):
+                if (i.getpixel((w, h)))[2] < lower:
+                    lower = i.getpixel((w, h))[2]
 
-    for w in range(width):
-        for h in range(height):
-            if (i.getpixel((w, h))) < lower:
-                lower = i.getpixel((w, h))
+        for w in tqdm(range(width)):
+            for h in range(height):
+                p = i.getpixel((w, h))
+                v = (p[0], p[1], int((255*(p[2] - lower))/(higher-lower)))
+                i.putpixel((w, h), v)
+    else:
+        for w in range(width):
+            for h in range(height):
+                if (i.getpixel((w, h))) > higher:
+                    higher = i.getpixel((w, h))
 
-    for w in tqdm(range(width)):
-        for h in range(height):
-            p = i.getpixel((w, h))
-            p = int((255*(p - lower))/(higher-lower))
-            i.putpixel((w, h), p)
+        for w in range(width):
+            for h in range(height):
+                if (i.getpixel((w, h))) < lower:
+                    lower = i.getpixel((w, h))
+
+        for w in tqdm(range(width)):
+            for h in range(height):
+                p = i.getpixel((w, h))
+                p = int((255*(p - lower))/(higher-lower))
+                i.putpixel((w, h), p)
     return i
 
 
@@ -99,40 +115,16 @@ def histogram_equalization(img):
 
     return i
 
-def rgb_to_hsv(r,g,b):
-    r = r/255
-    g = g/255
-    b = b/255
-
-    higher_rgb_value = max(r,g,b)
-    lower_rgb_value = min(r,g,b)
-    value = higher_rgb_value
-    dif = higher_rgb_value - lower_rgb_value
-
-    if higher_rgb_value == lower_rgb_value:
-        return 0.0, 0.0 , value
-
-    saturation = dif/higher_rgb_value
-
-    if higher_rgb_value == r:
-        hue = (60 * ((g-b)/dif) + 360) % 360
-    
-    if higher_rgb_value == g:
-        hue = (60 * ((b-r)/dif) + 120) % 360
-
-    if higher_rgb_value == b:
-        hue = (60 * ((r-g)/dif) + 240) % 360
- 
-    return hue,saturation, value
-
-
 
 img = histogram_equalization(RICE)
 img.save(results.joinpath('rice-histo.jpg'))
 print()
 
-
-
-#img.save(results.joinpath('chihiro_hsv.png'))
+img = contrast_stretching(RICE)
+img.save(results.joinpath('rice-stretching.jpg'))
 print()
 
+
+img = contrast_stretching(KIKI, is_colored=True).convert('RGB')
+img.save(results.joinpath('Kiki-stretch.jpg'))
+print()
